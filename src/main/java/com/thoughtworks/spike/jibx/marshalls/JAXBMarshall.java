@@ -9,7 +9,10 @@ import etm.core.monitor.EtmPoint;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,15 +22,17 @@ import java.util.concurrent.*;
 public class JAXBMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     private static final int MYTHREADS = 100;
-    ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
+    private ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
 
-    JAXBContext context;
-    Unmarshaller um;
+    private JAXBContext context;
+    private Unmarshaller um;
+    private Marshaller mctx;
 
     public JAXBMarshall() {
         try {
             context = JAXBContext.newInstance(CustomerJAXB.class);
             um = context.createUnmarshaller();
+            mctx = context.createMarshaller();
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -47,7 +52,7 @@ public class JAXBMarshall {
     }
 
     public List<CustomerJAXB> batchConvertXML(Collection<InputStream> customers) {
-        EtmPoint point = etmMonitor.createPoint("JiBXMarshall:batchConvertXML");
+        EtmPoint point = etmMonitor.createPoint("JAXBMarshall:batchConvertXML");
         ArrayList<CustomerJAXB> customerObjects = Lists.newArrayListWithCapacity(customers.size());
         try {
             for (final InputStream customer : customers) {
@@ -72,4 +77,13 @@ public class JAXBMarshall {
 
     }
 
+    public InputStream convertObject(CustomerJAXB customer) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            mctx.marshal(customer, out);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return new ByteArrayInputStream(out.toByteArray());
+    }
 }
