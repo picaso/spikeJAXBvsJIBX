@@ -21,24 +21,22 @@ import java.util.concurrent.*;
 
 public class JAXBMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
-    private static final int MYTHREADS = 100;
+    private static final int MYTHREADS = 8;
     private ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
 
     private JAXBContext context;
-    private Unmarshaller um;
-    private Marshaller mctx;
 
     public JAXBMarshall() {
         try {
             context = JAXBContext.newInstance(CustomerJAXB.class);
-            um = context.createUnmarshaller();
-            mctx = context.createMarshaller();
         } catch (JAXBException e) {
             e.printStackTrace();
         }
     }
 
-    public CustomerJAXB convertXML(InputStream document) {
+    public CustomerJAXB convertXML(InputStream document) throws JAXBException {
+        Unmarshaller um = context.createUnmarshaller();
+
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
         CustomerJAXB customerJAXB = null;
         try {
@@ -51,33 +49,45 @@ public class JAXBMarshall {
         return customerJAXB;
     }
 
-    public List<CustomerJAXB> batchConvertXML(Collection<InputStream> customers) {
-        EtmPoint point = etmMonitor.createPoint("JAXBMarshall:batchConvertXML");
+    public List<CustomerJAXB> batchConvertXML(Collection<InputStream> customers) throws JAXBException {
+        ArrayList<Future<CustomerJAXB>> futureCustomerObjects = Lists.newArrayListWithCapacity(customers.size());
         ArrayList<CustomerJAXB> customerObjects = Lists.newArrayListWithCapacity(customers.size());
+
+        EtmPoint point = etmMonitor.createPoint("JAXBMarshall:batchConvertXML");
         try {
             for (final InputStream customer : customers) {
                 Future<CustomerJAXB> future = executor.submit(new Callable<CustomerJAXB>() {
                     @Override
                     public CustomerJAXB call() throws Exception {
+                        Unmarshaller um = context.createUnmarshaller();
                         return (CustomerJAXB) um.unmarshal(customer);
                     }
                 });
-                customerObjects.add(future.get());
+                futureCustomerObjects.add(future);
             }
             executor.shutdown();
+            executor.awaitTermination(50, TimeUnit.SECONDS);
+
+            for(Future<CustomerJAXB> customer : futureCustomerObjects) {
+                customerObjects.add(customer.get());
+            }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } finally {
             point.collect();
-
         }
+
+
         return customerObjects;
 
     }
 
-    public InputStream convertObject(CustomerJAXB customer) {
+    public InputStream convertObject(CustomerJAXB customer) throws JAXBException {
+        Marshaller mctx = context.createMarshaller();
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             mctx.marshal(customer, out);

@@ -16,26 +16,25 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class JiBXMarshall {
-    private static final int MYTHREADS = 100;
+    private static final int MYTHREADS = 8;
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
     IBindingFactory bfact;
-    IUnmarshallingContext uctx;
-    IMarshallingContext mctx;
 
     public JiBXMarshall() {
         try {
             bfact = BindingDirectory.getFactory(CustomerJIBX.class);
-            uctx = bfact.createUnmarshallingContext();
-            mctx = bfact.createMarshallingContext();
         } catch (JiBXException e) {
             e.printStackTrace();
         }
     }
 
-    public CustomerJIBX convertXML(InputStream document) {
+    public CustomerJIBX convertXML(InputStream document) throws JiBXException {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
+        IUnmarshallingContext uctx;
+        uctx = bfact.createUnmarshallingContext();
         CustomerJIBX customerJIBX = null;
+
         try {
             customerJIBX = (CustomerJIBX) uctx.unmarshalDocument(document, null);
         } catch (JiBXException e) {
@@ -47,8 +46,10 @@ public class JiBXMarshall {
         return customerJIBX;
     }
 
-    public InputStream convertObject(CustomerJIBX customerJIBX) {
+    public InputStream convertObject(CustomerJIBX customerJIBX) throws JiBXException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        IMarshallingContext mctx;
+        mctx = bfact.createMarshallingContext();
         try {
             mctx.setIndent(2);
             mctx.setOutput(out, null);
@@ -59,20 +60,27 @@ public class JiBXMarshall {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    public List<CustomerJIBX> batchConvertXML(Collection<InputStream> customers) {
-        EtmPoint point = etmMonitor.createPoint("JiBXMarshall:batchConvertXML");
+    public List<CustomerJIBX> batchConvertXML(Collection<InputStream> customers) throws JiBXException {
+        ArrayList<Future<CustomerJIBX>> futureCustomerObjects = Lists.newArrayListWithCapacity(customers.size());
         ArrayList<CustomerJIBX> customerObjects = Lists.newArrayListWithCapacity(customers.size());
+        EtmPoint point = etmMonitor.createPoint("JiBXMarshall:batchConvertXML");
         try {
             for (final InputStream customer : customers) {
                 Future<CustomerJIBX> future = executor.submit(new Callable<CustomerJIBX>() {
+                    IUnmarshallingContext uctx = bfact.createUnmarshallingContext();
                     @Override
                     public CustomerJIBX call() throws Exception {
                         return (CustomerJIBX) uctx.unmarshalDocument(customer, null);
                     }
                 });
-                customerObjects.add(future.get());
+                futureCustomerObjects.add(future);
             }
             executor.shutdown();
+            executor.awaitTermination(50, TimeUnit.SECONDS);
+
+            for (Future<CustomerJIBX> futureCustomerObject : futureCustomerObjects) {
+                customerObjects.add(futureCustomerObject.get());
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

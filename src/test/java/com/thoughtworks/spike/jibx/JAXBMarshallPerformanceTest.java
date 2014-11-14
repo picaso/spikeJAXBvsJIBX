@@ -3,14 +3,9 @@ package com.thoughtworks.spike.jibx;
 import com.thoughtworks.spike.jibx.marshalls.JAXBMarshall;
 import com.thoughtworks.spike.jibx.model.CustomerJAXB;
 import com.thoughtworks.spike.jibx.model.PersonJAXB;
-import etm.core.configuration.BasicEtmConfigurator;
-import etm.core.configuration.EtmManager;
-import etm.core.monitor.EtmMonitor;
-import etm.core.renderer.SimpleTextRenderer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+import javax.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +15,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class JAXBMarshallPerformanceTest {
-    private final int MAX = 100;
+    private final int MAX = 100*1000;
 
     @Test
     public void shouldBindXMLWithClassUsingJAXB() throws Exception {
@@ -53,7 +48,7 @@ public class JAXBMarshallPerformanceTest {
         int counter = 0;
 
         //When
-        List<CustomerJAXB> customers = jaxbMarshall.batchConvertXML(generateJAXBCustomers(100, jaxbMarshall));
+        List<CustomerJAXB> customers = jaxbMarshall.batchConvertXML(generateJAXBCustomers(MAX, jaxbMarshall));
 
         //Then
         for (CustomerJAXB customer : customers) {
@@ -63,7 +58,7 @@ public class JAXBMarshallPerformanceTest {
 
     }
 
-    private Collection<InputStream> generateJAXBCustomers(int size, JAXBMarshall jaxbMarshall) {
+    private Collection<InputStream> generateJAXBCustomers(int size, JAXBMarshall jaxbMarshall) throws JAXBException {
         Collection<InputStream> customers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             CustomerJAXB customer = new CustomerJAXB();

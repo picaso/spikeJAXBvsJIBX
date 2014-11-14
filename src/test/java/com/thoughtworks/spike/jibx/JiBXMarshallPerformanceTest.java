@@ -3,12 +3,7 @@ package com.thoughtworks.spike.jibx;
 import com.thoughtworks.spike.jibx.marshalls.JiBXMarshall;
 import com.thoughtworks.spike.jibx.model.CustomerJIBX;
 import com.thoughtworks.spike.jibx.model.PersonJIBX;
-import etm.core.configuration.BasicEtmConfigurator;
-import etm.core.configuration.EtmManager;
-import etm.core.monitor.EtmMonitor;
-import etm.core.renderer.SimpleTextRenderer;
-import org.junit.After;
-import org.junit.Before;
+import org.jibx.runtime.JiBXException;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -20,7 +15,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class JiBXMarshallPerformanceTest {
-    private final int MAX = 100;
+    private final int MAX = 100*1000;
 
     @Test
     public void shouldBindXMLWithClassUsingJiBX() throws Exception {
@@ -54,7 +49,7 @@ public class JiBXMarshallPerformanceTest {
         int counter = 0;
 
         //When
-        List<CustomerJIBX> customers = jiBXMarshall.batchConvertXML(generateJiBXCustomers(100, jiBXMarshall));
+        List<CustomerJIBX> customers = jiBXMarshall.batchConvertXML(generateJiBXCustomers(MAX, jiBXMarshall));
 
         //Then
         for (CustomerJIBX customer : customers) {
@@ -66,7 +61,7 @@ public class JiBXMarshallPerformanceTest {
 
 
 
-    private Collection<InputStream> generateJiBXCustomers(int size, JiBXMarshall jiBXMarshall) {
+    private Collection<InputStream> generateJiBXCustomers(int size, JiBXMarshall jiBXMarshall) throws JiBXException {
         Collection<InputStream> customers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             CustomerJIBX customer = new CustomerJIBX();
