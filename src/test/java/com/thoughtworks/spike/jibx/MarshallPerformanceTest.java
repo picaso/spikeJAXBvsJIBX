@@ -73,7 +73,7 @@ public class MarshallPerformanceTest {
         int counter = 0;
 
         //When
-        List<CustomerJIBX> customers = jiBXMarshall.batchConvertXML(generateCustomers(100, jiBXMarshall));
+        List<CustomerJIBX> customers = jiBXMarshall.batchConvertXML(generateJiBXCustomers(100, jiBXMarshall));
 
         //Then
         for (CustomerJIBX customer : customers) {
@@ -108,7 +108,7 @@ public class MarshallPerformanceTest {
 
     }
 
-    private Collection<InputStream> generateCustomers(int size, JiBXMarshall jiBXMarshall) {
+    private Collection<InputStream> generateJiBXCustomers(int size, JiBXMarshall jiBXMarshall) {
         Collection<InputStream> customers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             CustomerJIBX customer = new CustomerJIBX();
