@@ -1,7 +1,7 @@
-package com.thoughtworks.spike.suit;
+package com.thoughtworks.spike.suite;
 
 
-import com.thoughtworks.spike.jibx.JAXBMarshallPerformanceTest;
+import com.thoughtworks.spike.jibx.JiBXMarshallPerformanceTest;
 import etm.core.configuration.BasicEtmConfigurator;
 import etm.core.configuration.EtmManager;
 import etm.core.monitor.EtmMonitor;
@@ -13,9 +13,9 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        JAXBMarshallPerformanceTest.class,
+        JiBXMarshallPerformanceTest.class,
 })
-public class JAXBMarshallPerformanceTestSuit {
+public class JiBXMarshallPerformanceTestSuite {
     private static EtmMonitor etmMonitor;
 
     @BeforeClass
@@ -29,7 +29,6 @@ public class JAXBMarshallPerformanceTestSuit {
     public static void tearDown() {
         etmMonitor.render(new SimpleTextRenderer());
         etmMonitor.stop();
-        etmMonitor.reset();
     }
 
 }

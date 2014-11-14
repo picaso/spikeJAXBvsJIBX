@@ -21,8 +21,8 @@ import java.util.concurrent.*;
 
 public class JAXBMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
-    private static final int MYTHREADS = 8;
-    private ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
+    private static final int MY_THREADS = 8;
+    private ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
 
     private JAXBContext context;
 
@@ -79,7 +79,6 @@ public class JAXBMarshall {
         } finally {
             point.collect();
         }
-
 
         return customerObjects;
 

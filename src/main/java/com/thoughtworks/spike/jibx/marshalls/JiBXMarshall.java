@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class JiBXMarshall {
-    private static final int MYTHREADS = 8;
+    private static final int MY_THREADS = 8;
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
-    ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
+    ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
     IBindingFactory bfact;
 
     public JiBXMarshall() {

@@ -59,8 +59,6 @@ public class JiBXMarshallPerformanceTest {
 
     }
 
-
-
     private Collection<InputStream> generateJiBXCustomers(int size, JiBXMarshall jiBXMarshall) throws JiBXException {
         Collection<InputStream> customers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
