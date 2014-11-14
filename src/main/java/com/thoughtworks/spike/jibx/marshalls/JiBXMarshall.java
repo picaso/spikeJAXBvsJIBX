@@ -14,11 +14,12 @@ import java.io.InputStream;
 public class JiBXMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     IBindingFactory bfact;
+    IUnmarshallingContext uctx;
 
     public JiBXMarshall() {
         try {
-            bfact =
-                    BindingDirectory.getFactory(CustomerJIBX.class);
+            bfact = BindingDirectory.getFactory(CustomerJIBX.class);
+            uctx = bfact.createUnmarshallingContext();
         } catch (JiBXException e) {
             e.printStackTrace();
         }
@@ -27,12 +28,8 @@ public class JiBXMarshall {
     public CustomerJIBX convertXML(InputStream document) {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
         CustomerJIBX customerJIBX = null;
-
         try {
-            IUnmarshallingContext uctx = bfact.createUnmarshallingContext();
-            customerJIBX = (CustomerJIBX) uctx.unmarshalDocument
-                    (document, null);
-
+            customerJIBX = (CustomerJIBX) uctx.unmarshalDocument(document, null);
         } catch (JiBXException e) {
             e.printStackTrace();
         } finally {

@@ -1,4 +1,4 @@
-package com.thgouhtworks.spike.jibx;
+package com.thoughtworks.spike.jibx;
 
 import com.thoughtworks.spike.jibx.model.CustomerJAXB;
 import com.thoughtworks.spike.jibx.model.CustomerJIBX;
@@ -17,7 +17,8 @@ import org.junit.Test;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class JibxTest {
+public class MarshallPerformanceTest {
+    private final int MAX = 100;
     private EtmMonitor etmMonitor;
 
 
@@ -32,6 +33,7 @@ public class JibxTest {
     public void tearDown() {
         etmMonitor.render(new SimpleTextRenderer());
         etmMonitor.stop();
+        etmMonitor.reset();
     }
 
     @Test
@@ -40,7 +42,7 @@ public class JibxTest {
         JiBXMarshall jiBXMarshall = new JiBXMarshall();
         CustomerJIBX customerJIBX = null;
         //When
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < MAX; i++) {
             customerJIBX = jiBXMarshall.convertXML(Thread.currentThread().getContextClassLoader().getResourceAsStream("customer.xml"));
         }
 
@@ -65,8 +67,7 @@ public class JibxTest {
         CustomerJAXB customerJAXB = null;
 
         //When
-        for (int i = 0; i < 100; i++) {
-
+        for (int i = 0; i < MAX; i++) {
             customerJAXB = jaxbMarshall.convertXML(Thread.currentThread().getContextClassLoader().getResourceAsStream("customer.xml"));
         }
         PersonJAXB personJAXB = customerJAXB.getPersonJAXB();

@@ -28,7 +28,6 @@ public class JAXBMarshall {
     public CustomerJAXB convertXML(InputStream document) {
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
         CustomerJAXB customerJAXB = null;
-
         try {
             customerJAXB = (CustomerJAXB) um.unmarshal(document);
         } catch (JAXBException e) {
