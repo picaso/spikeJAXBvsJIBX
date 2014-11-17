@@ -27,18 +27,15 @@ public class JAXBMarshall {
     private static final int MY_THREADS = 8;
     private ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
 
-    private JAXBContext context;
+    private final JAXBContext context;
+    private final Unmarshaller um;
 
-    public JAXBMarshall() {
-        try {
-            context = JAXBContext.newInstance(CustomerJAXB.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
+    public JAXBMarshall() throws JAXBException {
+        context = JAXBContext.newInstance(CustomerJAXB.class);
+        um = context.createUnmarshaller();
     }
 
     public CustomerJAXB convertXML(InputStream document) throws JAXBException, IOException {
-        Unmarshaller um = context.createUnmarshaller();
 
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
         CustomerJAXB customerJAXB = null;

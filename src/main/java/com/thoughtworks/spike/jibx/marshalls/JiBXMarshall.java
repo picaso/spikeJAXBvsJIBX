@@ -18,20 +18,16 @@ public class JiBXMarshall {
     private static final int MY_THREADS = 8;
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
-    IBindingFactory bfact;
+    private final IBindingFactory bfact;
+    private final IUnmarshallingContext uctx;
 
-    public JiBXMarshall() {
-        try {
-            bfact = BindingDirectory.getFactory(CustomerJIBX.class);
-        } catch (JiBXException e) {
-            e.printStackTrace();
-        }
+    public JiBXMarshall() throws JiBXException {
+        bfact = BindingDirectory.getFactory(CustomerJIBX.class);
+        uctx = bfact.createUnmarshallingContext();
     }
 
     public CustomerJIBX convertXML(InputStream document) throws JiBXException, IOException {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
-        IUnmarshallingContext uctx;
-        uctx = bfact.createUnmarshallingContext();
         CustomerJIBX customerJIBX = null;
         if(document == null) {
             throw new RuntimeException("document is null");
