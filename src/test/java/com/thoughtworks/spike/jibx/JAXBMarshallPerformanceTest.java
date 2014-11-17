@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import javax.xml.bind.JAXBException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class JAXBMarshallPerformanceTest {
-    private final int MAX = 100*1000;
+    private final int MAX = 1000*1000;
 
     @Test
     public void shouldBindXMLWithClassUsingJAXB() throws Exception {
@@ -24,6 +25,7 @@ public class JAXBMarshallPerformanceTest {
         CustomerJAXB customerJAXB = null;
 
         //When
+
         for (int i = 0; i < MAX; i++) {
             customerJAXB = jaxbMarshall.convertXML(Thread.currentThread().getContextClassLoader().getResourceAsStream("customer.xml"));
         }

@@ -13,7 +13,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +36,7 @@ public class JAXBMarshall {
         }
     }
 
-    public CustomerJAXB convertXML(InputStream document) throws JAXBException {
+    public CustomerJAXB convertXML(InputStream document) throws JAXBException, IOException {
         Unmarshaller um = context.createUnmarshaller();
 
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
@@ -44,6 +46,7 @@ public class JAXBMarshall {
         } catch (JAXBException e) {
             e.printStackTrace();
         } finally {
+            document.close();
             point.collect();
         }
         return customerJAXB;

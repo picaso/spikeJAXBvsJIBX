@@ -7,6 +7,7 @@ import org.jibx.runtime.JiBXException;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class JiBXMarshallPerformanceTest {
-    private final int MAX = 100*1000;
+    private final int MAX = 1000*1000;
 
     @Test
     public void shouldBindXMLWithClassUsingJiBX() throws Exception {
@@ -25,7 +26,7 @@ public class JiBXMarshallPerformanceTest {
 
         //When
         for (int i = 0; i < MAX; i++) {
-            customerJIBX = jiBXMarshall.convertXML(Thread.currentThread().getContextClassLoader().getResourceAsStream("customer.xml"));
+            customerJIBX = jiBXMarshall.convertXML(this.getClass().getClassLoader().getResourceAsStream("customer.xml"));
         }
 
         //Then

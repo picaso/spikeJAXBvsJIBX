@@ -7,9 +7,8 @@ import etm.core.monitor.EtmMonitor;
 import etm.core.monitor.EtmPoint;
 import org.jibx.runtime.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,17 +28,21 @@ public class JiBXMarshall {
         }
     }
 
-    public CustomerJIBX convertXML(InputStream document) throws JiBXException {
+    public CustomerJIBX convertXML(InputStream document) throws JiBXException, IOException {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
         IUnmarshallingContext uctx;
         uctx = bfact.createUnmarshallingContext();
         CustomerJIBX customerJIBX = null;
+        if(document == null) {
+            throw new RuntimeException("document is null");
+        }
 
         try {
             customerJIBX = (CustomerJIBX) uctx.unmarshalDocument(document, null);
         } catch (JiBXException e) {
             e.printStackTrace();
         } finally {
+            document.close();
             point.collect();
         }
 
