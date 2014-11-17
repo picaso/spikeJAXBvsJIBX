@@ -18,20 +18,16 @@ public class JiBXMarshall {
     private static final int MY_THREADS = 8;
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
-    IBindingFactory bfact;
+    private final IBindingFactory bfact;
+    private final IUnmarshallingContext uctx;
 
-    public JiBXMarshall() {
-        try {
-            bfact = BindingDirectory.getFactory(CustomerJIBX.class);
-        } catch (JiBXException e) {
-            e.printStackTrace();
-        }
+    public JiBXMarshall() throws JiBXException {
+        bfact = BindingDirectory.getFactory(CustomerJIBX.class);
+        uctx = bfact.createUnmarshallingContext();
     }
 
     public CustomerJIBX convertXML(InputStream document) throws JiBXException, IOException {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
-        IUnmarshallingContext uctx;
-        uctx = bfact.createUnmarshallingContext();
         CustomerJIBX customerJIBX = null;
         if(document == null) {
             throw new RuntimeException("document is null");
@@ -64,16 +60,21 @@ public class JiBXMarshall {
     }
 
     public List<CustomerJIBX> batchConvertXML(Collection<InputStream> customers) throws JiBXException {
+        final JiBXMarshallerPool pool = new JiBXMarshallerPool(8, bfact);
         ArrayList<Future<CustomerJIBX>> futureCustomerObjects = Lists.newArrayListWithCapacity(customers.size());
         ArrayList<CustomerJIBX> customerObjects = Lists.newArrayListWithCapacity(customers.size());
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:batchConvertXML");
         try {
             for (final InputStream customer : customers) {
                 Future<CustomerJIBX> future = executor.submit(new Callable<CustomerJIBX>() {
-                    IUnmarshallingContext uctx = bfact.createUnmarshallingContext();
                     @Override
                     public CustomerJIBX call() throws Exception {
-                        return (CustomerJIBX) uctx.unmarshalDocument(customer, null);
+                        return (CustomerJIBX) pool.borrowUnmarshaller((new JiBXMarshallerPool.Borrow<CustomerJIBX>() {
+                            @Override
+                            public CustomerJIBX run(IUnmarshallingContext context) throws JiBXException {
+                                return (CustomerJIBX) context.unmarshalDocument(customer, null);
+                            }
+                        }));
                     }
                 });
                 futureCustomerObjects.add(future);

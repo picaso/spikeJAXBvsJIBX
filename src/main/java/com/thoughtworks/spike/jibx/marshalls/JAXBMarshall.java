@@ -6,6 +6,7 @@ import com.thoughtworks.spike.jibx.model.CustomerJAXB;
 import etm.core.configuration.EtmManager;
 import etm.core.monitor.EtmMonitor;
 import etm.core.monitor.EtmPoint;
+import org.jibx.runtime.JiBXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,18 +27,15 @@ public class JAXBMarshall {
     private static final int MY_THREADS = 8;
     private ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
 
-    private JAXBContext context;
+    private final JAXBContext context;
+    private final Unmarshaller um;
 
-    public JAXBMarshall() {
-        try {
-            context = JAXBContext.newInstance(CustomerJAXB.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
+    public JAXBMarshall() throws JAXBException {
+        context = JAXBContext.newInstance(CustomerJAXB.class);
+        um = context.createUnmarshaller();
     }
 
     public CustomerJAXB convertXML(InputStream document) throws JAXBException, IOException {
-        Unmarshaller um = context.createUnmarshaller();
 
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
         CustomerJAXB customerJAXB = null;
@@ -52,18 +50,24 @@ public class JAXBMarshall {
         return customerJAXB;
     }
 
-    public List<CustomerJAXB> batchConvertXML(Collection<InputStream> customers) throws JAXBException {
+    public List<CustomerJAXB> batchConvertXML(Collection<InputStream> customers) throws JAXBException, JiBXException {
         ArrayList<Future<CustomerJAXB>> futureCustomerObjects = Lists.newArrayListWithCapacity(customers.size());
         ArrayList<CustomerJAXB> customerObjects = Lists.newArrayListWithCapacity(customers.size());
+        final JAXBMarshallerPool<CustomerJAXB> pool = new JAXBMarshallerPool<>(8, context);
 
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:batchConvertXML");
         try {
             for (final InputStream customer : customers) {
                 Future<CustomerJAXB> future = executor.submit(new Callable<CustomerJAXB>() {
+
                     @Override
                     public CustomerJAXB call() throws Exception {
-                        Unmarshaller um = context.createUnmarshaller();
-                        return (CustomerJAXB) um.unmarshal(customer);
+                        return pool.borrowUnmarshaller(new JAXBMarshallerPool.Borrow() {
+                            @Override
+                            public CustomerJAXB run(Unmarshaller unmarshaller) throws JAXBException {
+                                return (CustomerJAXB) unmarshaller.unmarshal(customer);
+                            }
+                        });
                     }
                 });
                 futureCustomerObjects.add(future);
