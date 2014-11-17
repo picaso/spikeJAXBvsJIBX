@@ -7,7 +7,6 @@ import org.jibx.runtime.JiBXException;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

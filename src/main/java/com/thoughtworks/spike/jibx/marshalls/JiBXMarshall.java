@@ -7,8 +7,10 @@ import etm.core.monitor.EtmMonitor;
 import etm.core.monitor.EtmPoint;
 import org.jibx.runtime.*;
 
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
