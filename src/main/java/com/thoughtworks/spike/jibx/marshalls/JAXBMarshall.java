@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,21 +28,16 @@ public class JAXBMarshall {
 
     private JAXBContext context;
 
-    Marshaller mctx;
-    Unmarshaller um;
-
     public JAXBMarshall() {
         try {
             context = JAXBContext.newInstance(CustomerJAXB.class);
-            mctx = context.createMarshaller();
-            um = context.createUnmarshaller();
-
         } catch (JAXBException e) {
             e.printStackTrace();
         }
     }
 
     public CustomerJAXB convertXML(InputStream document) throws JAXBException, IOException {
+        Unmarshaller um = context.createUnmarshaller();
 
         EtmPoint point = etmMonitor.createPoint("JAXBMarshall:convertXML");
         CustomerJAXB customerJAXB = null;
@@ -92,6 +88,7 @@ public class JAXBMarshall {
     }
 
     public InputStream convertObject(CustomerJAXB customer) throws JAXBException {
+        Marshaller mctx = context.createMarshaller();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {

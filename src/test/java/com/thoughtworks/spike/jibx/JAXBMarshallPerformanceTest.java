@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import javax.xml.bind.JAXBException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
