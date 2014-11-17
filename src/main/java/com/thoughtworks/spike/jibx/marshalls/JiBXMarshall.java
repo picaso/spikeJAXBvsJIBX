@@ -7,8 +7,10 @@ import etm.core.monitor.EtmMonitor;
 import etm.core.monitor.EtmPoint;
 import org.jibx.runtime.*;
 
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,10 +21,14 @@ public class JiBXMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
     IBindingFactory bfact;
+    IMarshallingContext mctx;
+    IUnmarshallingContext uctx;
 
     public JiBXMarshall() {
         try {
             bfact = BindingDirectory.getFactory(CustomerJIBX.class);
+            uctx = bfact.createUnmarshallingContext();
+            mctx = bfact.createMarshallingContext();
         } catch (JiBXException e) {
             e.printStackTrace();
         }
@@ -30,10 +36,8 @@ public class JiBXMarshall {
 
     public CustomerJIBX convertXML(InputStream document) throws JiBXException, IOException {
         EtmPoint point = etmMonitor.createPoint("JiBXMarshall:convertXML");
-        IUnmarshallingContext uctx;
-        uctx = bfact.createUnmarshallingContext();
         CustomerJIBX customerJIBX = null;
-        if(document == null) {
+        if (document == null) {
             throw new RuntimeException("document is null");
         }
 
@@ -51,8 +55,6 @@ public class JiBXMarshall {
 
     public InputStream convertObject(CustomerJIBX customerJIBX) throws JiBXException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        IMarshallingContext mctx;
-        mctx = bfact.createMarshallingContext();
         try {
             mctx.setIndent(2);
             mctx.setOutput(out, null);
@@ -71,6 +73,7 @@ public class JiBXMarshall {
             for (final InputStream customer : customers) {
                 Future<CustomerJIBX> future = executor.submit(new Callable<CustomerJIBX>() {
                     IUnmarshallingContext uctx = bfact.createUnmarshallingContext();
+
                     @Override
                     public CustomerJIBX call() throws Exception {
                         return (CustomerJIBX) uctx.unmarshalDocument(customer, null);
