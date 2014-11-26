@@ -21,11 +21,11 @@ public class JiBXMarshall {
     private EtmMonitor etmMonitor = EtmManager.getEtmMonitor();
     ExecutorService executor = Executors.newFixedThreadPool(MY_THREADS);
     private final IBindingFactory bfact;
-    private final IUnmarshallingContext uctx;
+    private final IUnmarshallingContext unmarshallingContext;
 
     public JiBXMarshall() throws JiBXException {
         bfact = BindingDirectory.getFactory(CustomerJIBX.class);
-        uctx = bfact.createUnmarshallingContext();
+        unmarshallingContext = bfact.createUnmarshallingContext();
     }
 
     public CustomerJIBX convertXML(InputStream document) throws JiBXException, IOException {
@@ -36,7 +36,7 @@ public class JiBXMarshall {
         }
 
         try {
-            customerJIBX = (CustomerJIBX) uctx.unmarshalDocument(document, null);
+            customerJIBX = (CustomerJIBX) unmarshallingContext.unmarshalDocument(document, null);
         } catch (JiBXException e) {
             e.printStackTrace();
         } finally {
@@ -49,12 +49,12 @@ public class JiBXMarshall {
 
     public InputStream convertObject(CustomerJIBX customerJIBX) throws JiBXException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        IMarshallingContext mctx;
-        mctx = bfact.createMarshallingContext();
+        IMarshallingContext marshallingContext;
+        marshallingContext = bfact.createMarshallingContext();
         try {
-            mctx.setIndent(2);
-            mctx.setOutput(out, null);
-            mctx.marshalDocument(customerJIBX);
+            marshallingContext.setIndent(2);
+            marshallingContext.setOutput(out, null);
+            marshallingContext.marshalDocument(customerJIBX);
         } catch (JiBXException e) {
             e.printStackTrace();
         }

@@ -8,11 +8,9 @@ import javax.xml.bind.Unmarshaller;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class JAXBMarshallerPool<T> {
-    private final JAXBContext context;
     private final java.util.concurrent.BlockingQueue<Unmarshaller> queue;
 
     public JAXBMarshallerPool(int size, JAXBContext context) throws JiBXException, JAXBException {
-        this.context = context;
 
         queue = new ArrayBlockingQueue<>(size);
         for(int i = 0; i < size; i++) {
